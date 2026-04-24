@@ -1,10 +1,8 @@
-/* ─────────────────────────────────────────────────────────────────────────────
-   script.js  –  BFHL Node Explorer
-   ─────────────────────────────────────────────────────────────────────────────*/
 
-const API_BASE = 'http://localhost:3000'; // ← change to your hosted URL before submission
 
-// ─── Example Data ──────────────────────────────────────────────────────────────
+const API_BASE = 'https://bfhl-backend.onrender.com'; 
+
+
 const EXAMPLES = {
   basic:   'A->B, A->C, B->D, C->E',
   cycle:   'X->Y, Y->Z, Z->X',
@@ -12,7 +10,7 @@ const EXAMPLES = {
   diamond: 'A->D, B->D, A->C, C->E'
 };
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+
 function parseInput(raw) {
   return raw
     .split(/[\n,]+/)
