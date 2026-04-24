@@ -151,11 +151,11 @@ function processData(data) {
   };
 }
 
-// GET /bfhl — standard BFHL health check
-app.get('/bfhl', (req, res) => res.json({ operation_code: 1 }));
+// GET /bfhl — standard BFHL health check (supports both /bfhl and /bfhl/bfhl)
+app.get(['/bfhl', '/bfhl/bfhl'], (req, res) => res.json({ operation_code: 1 }));
 
-// POST /bfhl — main endpoint
-app.post('/bfhl', (req, res) => {
+// POST /bfhl — main endpoint (supports both /bfhl and /bfhl/bfhl)
+app.post(['/bfhl', '/bfhl/bfhl'], (req, res) => {
   const { data } = req.body || {};
   if (!Array.isArray(data)) return res.status(400).json({ error: '"data" must be an array.' });
   res.json(processData(data));
