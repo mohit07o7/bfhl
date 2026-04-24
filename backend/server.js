@@ -10,7 +10,7 @@ app.use(express.json());
 
 
 const USER_ID             = 'mohitkumar_1042004';       // fullname_ddmmyyyy
-const EMAIL_ID            = 'my@srmist.edu.in'; // your college email
+const EMAIL_ID            = 'my2008@srmist.edu.in'; // your college email
 const COLLEGE_ROLL_NUMBER = 'RA2311026010846';            // your roll number
 
 
