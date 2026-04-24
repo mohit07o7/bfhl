@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BFHL Node Explorer | SRM Full Stack Challenge</title>
+  <meta name="description" content="Interactive REST API explorer for the SRM Full Stack Engineering Challenge — visualise hierarchical node relationships instantly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ─── Background Orbs ─────────────────────────────── -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- ─── Header ─────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">BFHL <span class="logo-accent">Explorer</span></span>
+      </div>
+      <span class="badge">SRM Full Stack Challenge</span>
+    </div>
+  </header>
+
+  <!-- ─── Main ────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Input Card -->
+    <section class="card input-card" id="input-section">
+      <div class="card-header">
+        <h1 class="card-title">Node Hierarchy Analyser</h1>
+        <p class="card-subtitle">Enter edge strings (e.g. <code>A->B</code>) separated by commas or new lines</p>
+      </div>
+
+      <div class="input-area">
+        <label class="input-label" for="node-input">Input Edges</label>
+        <textarea
+          id="node-input"
+          class="textarea"
+          rows="6"
+          placeholder='A->B, A->C, B->D, C->E, E->F&#10;X->Y, Y->Z, Z->X&#10;P->Q, Q->R&#10;hello, 1->2, A->'
+          spellcheck="false"
+        ></textarea>
+        <div class="input-meta">
+          <span id="entry-count" class="entry-count">0 entries</span>
+          <span class="tip">Separate with commas, spaces, or new lines</span>
+        </div>
+      </div>
+
+      <!-- Quick-fill examples -->
+      <div class="examples">
+        <span class="examples-label">Quick Examples:</span>
+        <button class="chip" id="ex-basic"   onclick="loadExample('basic')">Basic Tree</button>
+        <button class="chip" id="ex-cycle"   onclick="loadExample('cycle')">With Cycle</button>
+        <button class="chip" id="ex-full"    onclick="loadExample('full')">Full Demo</button>
+        <button class="chip" id="ex-diamond" onclick="loadExample('diamond')">Diamond</button>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-ghost" id="clear-btn" onclick="clearAll()">Clear</button>
+        <button class="btn btn-primary" id="submit-btn" onclick="submitData()">
+          <span class="btn-text">Analyse</span>
+          <span class="btn-icon">→</span>
+        </button>
+      </div>
+
+      <!-- Inline error -->
+      <div class="error-banner hidden" id="error-banner">
+        <span class="error-icon">⚠</span>
+        <span id="error-msg"></span>
+      </div>
+    </section>
+
+    <!-- ─── Results ──────────────────────────────────── -->
+    <section class="results hidden" id="results-section">
+
+      <!-- Summary Bar -->
+      <div class="summary-bar" id="summary-bar">
+        <div class="stat-card" id="stat-trees">
+          <span class="stat-value" id="val-trees">0</span>
+          <span class="stat-label">Trees</span>
+        </div>
+        <div class="stat-card" id="stat-cycles">
+          <span class="stat-value" id="val-cycles">0</span>
+          <span class="stat-label">Cycles</span>
+        </div>
+        <div class="stat-card" id="stat-largest">
+          <span class="stat-value" id="val-largest">—</span>
+          <span class="stat-label">Deepest Root</span>
+        </div>
+        <div class="stat-card" id="stat-invalid">
+          <span class="stat-value" id="val-invalid">0</span>
+          <span class="stat-label">Invalid</span>
+        </div>
+        <div class="stat-card" id="stat-dups">
+          <span class="stat-value" id="val-dups">0</span>
+          <span class="stat-label">Duplicates</span>
+        </div>
+      </div>
+
+      <!-- Tab strip -->
+      <div class="tabs" role="tablist">
+        <button class="tab active" id="tab-trees"    role="tab" onclick="switchTab('trees')">🌳 Trees</button>
+        <button class="tab"        id="tab-issues"   role="tab" onclick="switchTab('issues')">⚠ Issues</button>
+        <button class="tab"        id="tab-identity" role="tab" onclick="switchTab('identity')">🪪 Identity</button>
+        <button class="tab"        id="tab-raw"      role="tab" onclick="switchTab('raw')">{ } Raw JSON</button>
+      </div>
+
+      <!-- Panel: Trees -->
+      <div class="panel active" id="panel-trees">
+        <div class="tree-grid" id="tree-grid"></div>
+      </div>
+
+      <!-- Panel: Issues -->
+      <div class="panel hidden" id="panel-issues">
+        <div class="issues-row">
+          <div class="issue-block" id="block-invalid">
+            <h3 class="issue-title"><span class="dot dot-red"></span>Invalid Entries</h3>
+            <ul class="tag-list" id="list-invalid"></ul>
+          </div>
+          <div class="issue-block" id="block-dups">
+            <h3 class="issue-title"><span class="dot dot-yellow"></span>Duplicate Edges</h3>
+            <ul class="tag-list" id="list-dups"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Identity -->
+      <div class="panel hidden" id="panel-identity">
+        <div class="identity-grid" id="identity-grid"></div>
+      </div>
+
+      <!-- Panel: Raw JSON -->
+      <div class="panel hidden" id="panel-raw">
+        <div class="raw-toolbar">
+          <span class="raw-label">JSON Response</span>
+          <button class="btn btn-ghost btn-sm" onclick="copyRaw()">Copy</button>
+        </div>
+        <pre class="raw-json" id="raw-json"></pre>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>BFHL Explorer · SRM Full Stack Challenge · Built with Express + Vanilla JS</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
