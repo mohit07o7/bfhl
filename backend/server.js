@@ -164,4 +164,13 @@ app.post(['/bfhl', '/bfhl/bfhl'], (req, res) => {
 app.get('/', (req, res) => res.json({ status: 'BFHL API is running', endpoint: 'POST /bfhl' }));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`  BFHL API listening on http://localhost:${PORT}`));
+const server = app.listen(PORT, () => console.log(`  BFHL API listening on http://localhost:${PORT}`));
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n  ❌  Port ${PORT} is already in use.\n  Run: lsof -ti :${PORT} | xargs kill -9\n  Then restart the server.\n`);
+  } else {
+    console.error('Server error:', err);
+  }
+  process.exit(1);
+});

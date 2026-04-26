@@ -1,6 +1,6 @@
 
 
-const API_BASE = 'https://bfhl-backend.onrender.com'; 
+const API_BASE = 'http://localhost:3000'; // ← replace with your own Render URL after deploying
 
 
 const EXAMPLES = {
@@ -136,6 +136,10 @@ async function submitData() {
     }
 
     const json = await res.json();
+    // Validate our expected response shape
+    if (!json.summary || !Array.isArray(json.hierarchies)) {
+      throw new Error('Unexpected API response — make sure your own Render deployment is running (not someone else\'s).');
+    }
     renderResults(json);
   } catch (err) {
     showError(err.message || 'Could not reach the API. Is the backend running?');
@@ -147,11 +151,11 @@ async function submitData() {
 // ─── Render Results ─────────────────────────────────────────────────────────────
 function renderResults(data) {
   // Summary bar
-  document.getElementById('val-trees').textContent   = data.summary.total_trees;
-  document.getElementById('val-cycles').textContent  = data.summary.total_cycles;
-  document.getElementById('val-largest').textContent = data.summary.largest_tree_root || '—';
-  document.getElementById('val-invalid').textContent = data.invalid_entries.length;
-  document.getElementById('val-dups').textContent    = data.duplicate_edges.length;
+  document.getElementById('val-trees').textContent   = data.summary?.total_trees ?? 0;
+  document.getElementById('val-cycles').textContent  = data.summary?.total_cycles ?? 0;
+  document.getElementById('val-largest').textContent = data.summary?.largest_tree_root || '—';
+  document.getElementById('val-invalid').textContent = (data.invalid_entries ?? []).length;
+  document.getElementById('val-dups').textContent    = (data.duplicate_edges ?? []).length;
 
   // Tree cards
   const grid = document.getElementById('tree-grid');
